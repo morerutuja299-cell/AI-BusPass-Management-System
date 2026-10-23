@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}Applications – BusIQ Admin{% endblock %}
+
+{% block sidebar %}
+<div class="col-md-2 sidebar py-3 d-none d-md-block">
+    <p class="text-muted small px-3 fw-bold" style="text-transform:uppercase;letter-spacing:1px;">Admin Panel</p>
+    <nav class="nav flex-column">
+        <a class="nav-link" href="{% url 'admin_dashboard' %}"><i class="bi bi-speedometer2"></i>Dashboard</a>
+        <a class="nav-link active" href="{% url 'admin_application_list' %}"><i class="bi bi-file-earmark-text"></i>Applications</a>
+        <a class="nav-link" href="{% url 'admin_user_list' %}"><i class="bi bi-people"></i>Users</a>
+        <a class="nav-link" href="{% url 'admin_fraud_alerts' %}"><i class="bi bi-exclamation-triangle"></i>Fraud Alerts</a>
+        <hr class="mx-3">
+        <a class="nav-link text-danger" href="{% url 'user_logout' %}"><i class="bi bi-box-arrow-right"></i>Logout</a>
+    </nav>
+</div>
+{% endblock %}
+
+{% block content %}
+<h4 class="fw-bold mb-4"><i class="bi bi-file-earmark-text me-2 text-primary"></i>Bus Pass Applications</h4>
+
+<!-- Filter Buttons -->
+<div class="mb-3 d-flex gap-2 flex-wrap">
+    <a href="?status=all"
+       class="btn btn-sm {% if status_filter == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+        All
+    </a>
+    <a href="?status=pending"
+       class="btn btn-sm {% if status_filter == 'pending' %}btn-warning text-dark{% else %}btn-outline-warning{% endif %}">
+        <i class="bi bi-hourglass-split me-1"></i>Pending
+    </a>
+    <a href="?status=approved"
+       class="btn btn-sm {% if status_filter == 'approved' %}btn-success{% else %}btn-outline-success{% endif %}">
+        <i class="bi bi-check-circle me-1"></i>Approved
+    </a>
+    <a href="?status=rejected"
+       class="btn btn-sm {% if status_filter == 'rejected' %}btn-danger{% else %}btn-outline-danger{% endif %}">
+        <i class="bi bi-x-circle me-1"></i>Rejected
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Pass #</th>
+                    <th>Applicant</th>
+                    <th>Route</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Applied On</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for app in applications %}
+                <tr>
+                    <td class="fw-semibold small">{{ app.pass_number }}</td>
+                    <td>
+                        <p class="mb-0 small fw-semibold">{{ app.user.get_full_name|default:app.user.username }}</p>
+                        <p class="mb-0 text-muted" style="font-size:.75rem;">{{ app.user.email }}</p>
+                    </td>
+                    <td class="small">{{ app.route }}</td>
+                    <td class="small">{{ app.get_pass_type_display }}</td>
+                    <td>
+                        <span class="badge
+                            {% if app.status == 'approved' %}bg-success
+                            {% elif app.status == 'pending' %}bg-warning text-dark
+                            {% elif app.status == 'rejected' %}bg-danger
+                            {% else %}bg-secondary{% endif %}">
+                            {{ app.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="small text-muted">{{ app.created_at|date:"d M Y" }}</td>
+                    <td>
+                        <a href="{% url 'admin_application_detail' app.id %}"
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye me-1"></i>Review
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-5">
+                        <i class="bi bi-inbox" style="font-size:2rem;display:block;margin-bottom:8px;"></i>
+                        No applications found
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}My Passes – BusIQ{% endblock %}
+
+{% block sidebar %}
+<div class="col-md-2 sidebar py-3 d-none d-md-block">
+    <p class="text-muted small px-3 fw-bold" style="text-transform:uppercase;letter-spacing:1px;">Menu</p>
+    <nav class="nav flex-column">
+        <a class="nav-link" href="{% url 'user_dashboard' %}"><i class="bi bi-speedometer2"></i>Dashboard</a>
+        <a class="nav-link" href="{% url 'apply_pass' %}"><i class="bi bi-file-earmark-plus"></i>Apply for Pass</a>
+        <a class="nav-link active" href="{% url 'view_pass' %}"><i class="bi bi-card-list"></i>My Passes</a>
+        <a class="nav-link" href="{% url 'ai_verification_status' %}"><i class="bi bi-shield-check"></i>AI Verification</a>
+        <a class="nav-link" href="{% url 'user_profile' %}"><i class="bi bi-person"></i>Profile</a>
+    </nav>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0"><i class="bi bi-card-list me-2 text-primary"></i>My Bus Passes</h4>
+    <a href="{% url 'apply_pass' %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-circle me-1"></i>Apply New
+    </a>
+</div>
+
+{% if passes %}
+    {% for pass in passes %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="d-flex align-items-center mb-2">
+                        <h5 class="mb-0 me-3">Pass #{{ pass.pass_number }}</h5>
+                        <span class="badge
+                            {% if pass.status == 'approved' %}bg-success
+                            {% elif pass.status == 'pending' %}bg-warning text-dark
+                            {% elif pass.status == 'rejected' %}bg-danger
+                            {% else %}bg-secondary{% endif %}">
+                            {{ pass.get_status_display }}
+                        </span>
+                    </div>
+                    <p class="mb-1 small text-muted">
+                        <i class="bi bi-geo-alt me-1"></i>{{ pass.route }}
+                        &nbsp;|&nbsp;
+                        <i class="bi bi-calendar me-1"></i>{{ pass.get_pass_type_display }}
+                        &nbsp;|&nbsp;
+                        <i class="bi bi-clock me-1"></i>Applied: {{ pass.created_at|date:"d M Y" }}
+                    </p>
+                    {% if pass.valid_from and pass.valid_until %}
+                    <p class="mb-1 small">
+                        <i class="bi bi-check-circle text-success me-1"></i>
+                        Valid: <strong>{{ pass.valid_from }}</strong> to <strong>{{ pass.valid_until }}</strong>
+                    </p>
+                    {% endif %}
+                    {% if pass.admin_remarks %}
+                    <p class="mb-0 small text-muted">
+                        <i class="bi bi-chat-text me-1"></i>{{ pass.admin_remarks }}
+                    </p>
+                    {% endif %}
+                </div>
+                <div class="col-md-4 text-end">
+                    {% if pass.status == 'approved' %}
+                        <a href="{% url 'download_pass' pass.id %}" class="btn btn-success btn-sm">
+                            <i class="bi bi-download me-1"></i>Download Pass
+                        </a>
+                    {% elif pass.status == 'expired' %}
+                        <a href="{% url 'renew_pass' pass.id %}" class="btn btn-warning btn-sm">
+                            <i class="bi bi-arrow-repeat me-1"></i>Renew
+                        </a>
+                    {% elif pass.status == 'pending' %}
+                        <span class="text-muted small"><i class="bi bi-hourglass-split me-1"></i>Awaiting admin review</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-ticket-perforated text-muted" style="font-size:4rem;"></i>
+            <h5 class="mt-3 text-muted">No bus passes found</h5>
+            <p class="text-muted">Apply for your first bus pass now!</p>
+            <a href="{% url 'apply_pass' %}" class="btn btn-primary mt-2">Apply Now</a>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}Download Pass – BusIQ{% endblock %}
+{% block main_class %}col-12{% endblock %}
+
+{% block extra_css %}
+<style>
+    @media print {
+        nav, .no-print { display: none !important; }
+        .pass-card { box-shadow: none !important; border: 2px solid #1a237e !important; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6">
+        <div class="no-print text-center mb-3">
+            <a href="{% url 'view_pass' %}" class="btn btn-outline-secondary btn-sm me-2">
+                <i class="bi bi-arrow-left me-1"></i>Back
+            </a>
+            <button onclick="window.print()" class="btn btn-primary btn-sm">
+                <i class="bi bi-printer me-1"></i>Print Pass
+            </button>
+        </div>
+
+        <!-- Digital Pass Card -->
+        <div class="card pass-card" style="border: 3px solid #1a237e;">
+            <!-- Header -->
+            <div class="card-header text-white text-center py-3" style="background: linear-gradient(135deg,#1a237e,#3949ab);">
+                <h4 class="mb-0 fw-bold"><i class="bi bi-bus-front-fill me-2"></i>BusIQ Digital Pass</h4>
+                <small>AI Based Bus Pass Management System</small>
+            </div>
+
+            <div class="card-body p-4">
+                <!-- User Info -->
+                <div class="text-center mb-3">
+                    {% if bus_pass.user.profile_photo %}
+                    <img src="{{ bus_pass.user.profile_photo.url }}" alt="Photo"
+                         class="rounded-circle border border-3 border-primary"
+                         style="width:80px;height:80px;object-fit:cover;">
+                    {% else %}
+                    <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center"
+                         style="width:80px;height:80px;">
+                        <i class="bi bi-person-fill text-white" style="font-size:2.5rem;"></i>
+                    </div>
+                    {% endif %}
+                    <h4 class="fw-bold mt-2 mb-0">{{ bus_pass.user.get_full_name }}</h4>
+                    <p class="text-muted small">@{{ bus_pass.user.username }}</p>
+                </div>
+
+                <hr>
+
+                <!-- Pass Details -->
+                <div class="row text-sm mb-3">
+                    <div class="col-6 mb-2">
+                        <p class="text-muted small mb-0">PASS NUMBER</p>
+                        <p class="fw-bold mb-0">{{ bus_pass.pass_number }}</p>
+                    </div>
+                    <div class="col-6 mb-2">
+                        <p class="text-muted small mb-0">PASS TYPE</p>
+                        <p class="fw-bold mb-0">{{ bus_pass.get_pass_type_display }}</p>
+                    </div>
+                    <div class="col-12 mb-2">
+                        <p class="text-muted small mb-0">ROUTE</p>
+                        <p class="fw-bold mb-0">{{ bus_pass.route }}</p>
+                    </div>
+                    <div class="col-6 mb-2">
+                        <p class="text-muted small mb-0">VALID FROM</p>
+                        <p class="fw-bold mb-0">{{ bus_pass.valid_from }}</p>
+                    </div>
+                    <div class="col-6 mb-2">
+                        <p class="text-muted small mb-0">VALID UNTIL</p>
+                        <p class="fw-bold mb-0">{{ bus_pass.valid_until }}</p>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- QR Code -->
+                <div class="text-center">
+                    {% if bus_pass.qr_code %}
+                    <img src="{{ bus_pass.qr_code.url }}" alt="QR Code"
+                         style="width:180px;height:180px;">
+                    {% else %}
+                    <div class="bg-light p-4 rounded d-inline-block">
+                        <i class="bi bi-qr-code text-muted" style="font-size:5rem;"></i>
+                        <p class="text-muted small mt-2 mb-0">QR code will appear here</p>
+                    </div>
+                    {% endif %}
+                    <p class="text-muted small mt-2">Scan to verify this pass</p>
+                </div>
+
+                <hr>
+
+                <!-- Verified Badge -->
+                <div class="text-center">
+                    <span class="badge bg-success fs-6 px-4 py-2">
+                        <i class="bi bi-patch-check-fill me-2"></i>VERIFIED & APPROVED
+                    </span>
+                    <p class="text-muted small mt-2 mb-0">Issued by BusIQ System</p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="card-footer text-center text-muted small py-2" style="background:#f8f9fa;">
+                This is a digitally generated pass. Valid only with QR verification.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

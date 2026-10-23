@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% block title %}Application Detail – BusIQ Admin{% endblock %}
+
+{% block sidebar %}
+<div class="col-md-2 sidebar py-3 d-none d-md-block">
+    <p class="text-muted small px-3 fw-bold" style="text-transform:uppercase;letter-spacing:1px;">Admin Panel</p>
+    <nav class="nav flex-column">
+        <a class="nav-link" href="{% url 'admin_dashboard' %}"><i class="bi bi-speedometer2"></i>Dashboard</a>
+        <a class="nav-link active" href="{% url 'admin_application_list' %}"><i class="bi bi-file-earmark-text"></i>Applications</a>
+        <a class="nav-link" href="{% url 'admin_user_list' %}"><i class="bi bi-people"></i>Users</a>
+        <a class="nav-link" href="{% url 'admin_fraud_alerts' %}"><i class="bi bi-exclamation-triangle"></i>Fraud Alerts</a>
+    </nav>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">
+        <i class="bi bi-file-earmark-text me-2 text-primary"></i>
+        Application — #{{ bus_pass.pass_number }}
+    </h4>
+    <a href="{% url 'admin_application_list' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Back to List
+    </a>
+</div>
+
+<div class="row g-4">
+    <!-- User Info -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-white">
+                <strong><i class="bi bi-person-fill me-2 text-primary"></i>Applicant Information</strong>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-borderless mb-3">
+                    <tr><td class="text-muted small">Full Name</td><td class="fw-semibold">{{ bus_pass.user.get_full_name }}</td></tr>
+                    <tr><td class="text-muted small">Username</td><td>{{ bus_pass.user.username }}</td></tr>
+                    <tr><td class="text-muted small">Email</td><td>{{ bus_pass.user.email }}</td></tr>
+                    <tr><td class="text-muted small">Phone</td><td>{{ bus_pass.user.phone|default:"—" }}</td></tr>
+                    <tr><td class="text-muted small">Date of Birth</td><td>{{ bus_pass.user.date_of_birth|default:"—" }}</td></tr>
+                    <tr><td class="text-muted small">Address</td><td>{{ bus_pass.user.address|default:"—" }}</td></tr>
+                </table>
+                <div class="row g-2 mt-1">
+                    {% if bus_pass.user.profile_photo %}
+                    <div class="col-6 text-center">
+                        <p class="text-muted small mb-1">Profile Photo</p>
+                        <img src="{{ bus_pass.user.profile_photo.url }}" alt="Profile"
+                             class="img-thumbnail" style="max-height:130px;max-width:100%;">
+                    </div>
+                    {% endif %}
+                    {% if bus_pass.user.id_proof %}
+                    <div class="col-6 text-center">
+                        <p class="text-muted small mb-1">ID Proof</p>
+                        <img src="{{ bus_pass.user.id_proof.url }}" alt="ID Proof"
+                             class="img-thumbnail" style="max-height:130px;max-width:100%;">
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <!-- AI Verification -->
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <strong><i class="bi bi-cpu-fill me-2 text-primary"></i>AI Verification Result</strong>
+            </div>
+            <div class="card-body">
+                {% if ai_result %}
+                <div class="mb-3">
+                    <span class="badge fs-6
+                        {% if ai_result.is_verified %}bg-success
+                        {% elif ai_result.fraud_flag %}bg-danger
+                        {% else %}bg-warning text-dark{% endif %} px-3 py-2">
+                        <i class="bi bi-{% if ai_result.is_verified %}shield-fill-check{% elif ai_result.fraud_flag %}exclamation-octagon-fill{% else %}shield-exclamation{% endif %} me-2"></i>
+                        {% if ai_result.is_verified %}VERIFIED
+                        {% elif ai_result.fraud_flag %}FRAUD DETECTED
+                        {% else %}NOT VERIFIED{% endif %}
+                    </span>
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-6">
+                        <p class="mb-1 small text-muted">Face Verification</p>
+                        <div class="progress mb-1" style="height:6px;">
+                            <div class="progress-bar {% if ai_result.face_verified %}bg-success{% else %}bg-danger{% endif %}"
+                                 style="width:{{ ai_result.face_confidence }}%"></div>
+                        </div>
+                        <small>{{ ai_result.face_confidence }}% — {% if ai_result.face_verified %}✓{% else %}✗{% endif %}</small>
+                    </div>
+                    <div class="col-6">
+                        <p class="mb-1 small text-muted">Document (OCR)</p>
+                        <div class="progress mb-1" style="height:6px;">
+                            <div class="progress-bar {% if ai_result.document_verified %}bg-success{% else %}bg-danger{% endif %}"
+                                 style="width:{{ ai_result.doc_confidence }}%"></div>
+                        </div>
+                        <small>{{ ai_result.doc_confidence }}% — {% if ai_result.document_verified %}✓{% else %}✗{% endif %}</small>
+                    </div>
+                </div>
+                {% if ai_result.extracted_name %}
+                <p class="small mb-1"><strong>Extracted Name:</strong> {{ ai_result.extracted_name }}</p>
+                {% endif %}
+                {% if ai_result.extracted_id_number %}
+                <p class="small mb-1"><strong>Extracted ID:</strong> {{ ai_result.extracted_id_number }}</p>
+                {% endif %}
+                {% if ai_result.fraud_flag %}
+                <div class="alert alert-danger py-2 mt-2 small">
+                    <strong>Fraud Reason:</strong> {{ ai_result.fraud_reason }}
+                </div>
+                {% endif %}
+                {% else %}
+                <p class="text-muted">No AI verification record found for this user.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Pass Details -->
+        <div class="card">
+            <div class="card-header bg-white">
+                <strong><i class="bi bi-ticket-perforated me-2 text-primary"></i>Pass Details</strong>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-borderless mb-0">
+                    <tr><td class="text-muted small">Route</td><td class="fw-semibold">{{ bus_pass.route }}</td></tr>
+                    <tr><td class="text-muted small">Pass Type</td><td>{{ bus_pass.get_pass_type_display }}</td></tr>
+                    <tr><td class="text-muted small">Status</td>
+                        <td>
+                            <span class="badge
+                                {% if bus_pass.status == 'approved' %}bg-success
+                                {% elif bus_pass.status == 'pending' %}bg-warning text-dark
+                                {% elif bus_pass.status == 'rejected' %}bg-danger
+                                {% else %}bg-secondary{% endif %}">
+                                {{ bus_pass.get_status_display }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr><td class="text-muted small">Applied On</td><td>{{ bus_pass.created_at|date:"d M Y, H:i" }}</td></tr>
+                    {% if bus_pass.valid_from %}<tr><td class="text-muted small">Valid From</td><td>{{ bus_pass.valid_from }}</td></tr>{% endif %}
+                    {% if bus_pass.valid_until %}<tr><td class="text-muted small">Valid Until</td><td>{{ bus_pass.valid_until }}</td></tr>{% endif %}
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Approve / Reject Actions -->
+{% if bus_pass.status == 'pending' %}
+<div class="row g-4 mt-1">
+    <div class="col-md-6">
+        <div class="card border-success">
+            <div class="card-header bg-success text-white">
+                <strong><i class="bi bi-check-circle-fill me-2"></i>Approve Application</strong>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'admin_approve_pass' bus_pass.id %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label small">Admin Remarks (optional)</label>
+                        <textarea name="remarks" class="form-control" rows="2"
+                                  placeholder="Verified and approved..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 fw-semibold">
+                        <i class="bi bi-check-circle me-2"></i>Confirm Approval
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <strong><i class="bi bi-x-circle-fill me-2"></i>Reject Application</strong>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'admin_reject_pass' bus_pass.id %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label small">Reason for Rejection <span class="text-danger">*</span></label>
+                        <textarea name="remarks" class="form-control" rows="2"
+                                  placeholder="Documents unclear / Verification failed..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-danger w-100 fw-semibold">
+                        <i class="bi bi-x-circle me-2"></i>Confirm Rejection
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

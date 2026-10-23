@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Fraud Alerts – BusIQ Admin{% endblock %}
+
+{% block sidebar %}
+<div class="col-md-2 sidebar py-3 d-none d-md-block">
+    <p class="text-muted small px-3 fw-bold" style="text-transform:uppercase;letter-spacing:1px;">Admin Panel</p>
+    <nav class="nav flex-column">
+        <a class="nav-link" href="{% url 'admin_dashboard' %}"><i class="bi bi-speedometer2"></i>Dashboard</a>
+        <a class="nav-link" href="{% url 'admin_application_list' %}"><i class="bi bi-file-earmark-text"></i>Applications</a>
+        <a class="nav-link" href="{% url 'admin_user_list' %}"><i class="bi bi-people"></i>Users</a>
+        <a class="nav-link active" href="{% url 'admin_fraud_alerts' %}"><i class="bi bi-exclamation-triangle"></i>Fraud Alerts</a>
+    </nav>
+</div>
+{% endblock %}
+
+{% block content %}
+<h4 class="fw-bold mb-4 text-danger">
+    <i class="bi bi-exclamation-octagon-fill me-2"></i>Fraud Alerts
+</h4>
+
+{% if fraud_cases %}
+    {% for case in fraud_cases %}
+    <div class="card mb-3 border-danger">
+        <div class="card-header bg-danger text-white d-flex justify-content-between">
+            <span>
+                <i class="bi bi-shield-fill-x me-2"></i>
+                <strong>Fraud Detected</strong> — {{ case.user.username }}
+            </span>
+            <small>{{ case.created_at|date:"d M Y, H:i" }}</small>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-1 small"><strong>Full Name:</strong> {{ case.user.get_full_name }}</p>
+                    <p class="mb-1 small"><strong>Email:</strong> {{ case.user.email }}</p>
+                    <p class="mb-1 small"><strong>Phone:</strong> {{ case.user.phone|default:"—" }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-1 small"><strong>Face Confidence:</strong> {{ case.face_confidence }}%</p>
+                    <p class="mb-1 small"><strong>Doc Confidence:</strong> {{ case.doc_confidence }}%</p>
+                    <p class="mb-1 small text-danger"><strong>Reason:</strong> {{ case.fraud_reason }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-shield-fill-check text-success" style="font-size:4rem;"></i>
+            <h5 class="mt-3 text-success">No Fraud Alerts!</h5>
+            <p class="text-muted">All users have passed AI verification with no suspicious activity.</p>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

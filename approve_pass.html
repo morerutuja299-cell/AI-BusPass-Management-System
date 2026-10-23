@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Approve Pass – BusIQ Admin{% endblock %}
+{% block main_class %}col-12{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-5">
+        <div class="card border-success shadow">
+            <div class="card-header bg-success text-white py-3">
+                <h5 class="mb-0"><i class="bi bi-check-circle-fill me-2"></i>Approve Pass #{{ bus_pass.pass_number }}</h5>
+            </div>
+            <div class="card-body p-4">
+                <table class="table table-sm table-borderless mb-3">
+                    <tr><td class="text-muted small">Applicant</td><td class="fw-semibold">{{ bus_pass.user.get_full_name }}</td></tr>
+                    <tr><td class="text-muted small">Route</td><td>{{ bus_pass.route }}</td></tr>
+                    <tr><td class="text-muted small">Pass Type</td><td>{{ bus_pass.get_pass_type_display }}</td></tr>
+                </table>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Remarks (optional)</label>
+                        <textarea name="remarks" class="form-control" rows="3"
+                                  placeholder="Approved after successful AI verification..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 py-2 fw-semibold">
+                        <i class="bi bi-check-circle me-2"></i>Confirm Approval & Generate QR
+                    </button>
+                    <a href="{% url 'admin_application_list' %}" class="btn btn-outline-secondary w-100 mt-2">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

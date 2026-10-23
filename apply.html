@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Apply for Bus Pass – BusIQ{% endblock %}
+
+{% block sidebar %}
+<div class="col-md-2 sidebar py-3 d-none d-md-block">
+    <p class="text-muted small px-3 fw-bold" style="text-transform:uppercase;letter-spacing:1px;">Menu</p>
+    <nav class="nav flex-column">
+        <a class="nav-link" href="{% url 'user_dashboard' %}"><i class="bi bi-speedometer2"></i>Dashboard</a>
+        <a class="nav-link active" href="{% url 'apply_pass' %}"><i class="bi bi-file-earmark-plus"></i>Apply for Pass</a>
+        <a class="nav-link" href="{% url 'view_pass' %}"><i class="bi bi-card-list"></i>My Passes</a>
+    </nav>
+</div>
+{% endblock %}
+
+{% block content %}
+<h4 class="fw-bold mb-4"><i class="bi bi-file-earmark-plus me-2 text-primary"></i>Apply for Bus Pass</h4>
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-white"><strong>New Application</strong></div>
+            <div class="card-body p-4">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold small">SELECT ROUTE</label>
+                        {{ form.route }}
+                        {% if form.route.errors %}<div class="text-danger small mt-1">{{ form.route.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold small">PASS TYPE</label>
+                        {{ form.pass_type }}
+                    </div>
+                    <div class="alert alert-light border mb-4">
+                        <p class="mb-1 small"><i class="bi bi-calendar me-2"></i><strong>Monthly</strong> — Valid for 30 days</p>
+                        <p class="mb-1 small"><i class="bi bi-calendar2-range me-2"></i><strong>Quarterly</strong> — Valid for 90 days</p>
+                        <p class="mb-0 small"><i class="bi bi-calendar3 me-2"></i><strong>Annual</strong> — Valid for 365 days</p>
+                    </div>
+                    <div class="alert alert-info py-2 small mb-4">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Application will be reviewed by admin after AI verification confirmation.
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+                        <i class="bi bi-send me-2"></i>Submit Application
+                    </button>
+                    <a href="{% url 'user_dashboard' %}" class="btn btn-outline-secondary w-100 mt-2">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
